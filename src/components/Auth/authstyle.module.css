@@ -1,0 +1,22 @@
+.swal {
+  @apply text-3xl font-roboto md:p-10 p-4 md:w-auto h-auto w-[60vw];
+}
+.formContainer {
+  @apply p-8 md:w-[60%] w-[80%] rounded-lg flex flex-col items-center;
+  box-shadow: inset -50px -50px 100px #f2f2f2,
+  inset 50px 50px 100px #ffffff}
+.inputContainer {
+  @apply flex items-center border border-petBlue rounded-full px-2 space-x-2 bg-slate-100 hover:bg-white transition-all duration-300;
+}
+.input {
+  @apply w-full  flex items-center outline-none bg-transparent py-2;
+}
+.authBtn {
+  @apply md:text-xl py-2 bg-petBlue/70 hover:bg-petBlue text-white w-full rounded-full transition-all duration-500;
+}
+.authDivider {
+  @apply w-[70%] h-px bg-black/50 mt-[4vh];
+}
+.authLink {
+  @apply text-blue-600 underline underline-offset-2;
+}
