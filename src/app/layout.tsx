@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import { NextUiProviders } from "../providers/next-ui";
-import { GoogleRecaptchaWrapper } from "@/providers/google-recaptcha";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,14 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <GoogleRecaptchaWrapper>
           <NextUiProviders>
             <NavBar />
             <main className="md:mt-20 mt-12 w-full min-h-screen">
               {children}
             </main>
           </NextUiProviders>
-        </GoogleRecaptchaWrapper>
       </body>
     </html>
   );
