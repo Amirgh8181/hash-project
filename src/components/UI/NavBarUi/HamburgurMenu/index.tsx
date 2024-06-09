@@ -2,7 +2,6 @@
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {motion} from 'framer-motion'
-import Logo from "../../Logo";
 import NavBar from "@/components/NavBar";
 import { AiOutlineClose } from "react-icons/ai";
 
@@ -65,9 +64,6 @@ const HamburgurMenu = ({mobileMenu,setOpenHamMenu}:{mobileMenu:boolean,setOpenHa
                             variants={childVariant}
                         >
 
-                            <div>
-                                <Logo width={150} height={150} type='white' />
-                            </div>
 
                             {/* btn for close hamburgur menu */}
 
