@@ -14,6 +14,7 @@
     "axios": "^1.6.8",
     "blueimp-md5": "^2.19.0",
     "crypto-js": "^4.2.0",
+    "elgamal": "^0.3.0",
     "framer-motion": "^11.1.9",
     "next": "14.2.3",
     "react": "^18",

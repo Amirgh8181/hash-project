@@ -1,12 +1,12 @@
 import React from 'react';
 
 
-const SHAExample: React.FC = () => {
+const SHAExample = ({ message }: { message: string }) => {
   const CryptoJS = require("crypto-js");
 
   // کلید و پیام برای تولید HMAC
   const key = '12345678';
-  const message = 'Hello, World!';
+  
 
   // تولید HMAC با الگوریتم SHA256
   const hmacSHA256 = CryptoJS.HmacSHA256(message, key).toString(CryptoJS.enc.Hex);

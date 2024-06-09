@@ -1,16 +1,16 @@
 import React from 'react';
 
-const RSAExample: React.FC = () => {
+const RSAExample = ({ message }: { message: string }) => {
     const CryptoJS = require("crypto-js");
 
     // تولید کلید‌های عمومی و خصوصی RSA
     const RSAKeyPair = CryptoJS.lib.WordArray.random(512 / 8); // برای مثال، اندازه کلید 512 بیت است
 
     // متن اصلی برای رمزنگاری
-    const originalText = 'Hello, World!';
+    
 
     // رمزنگاری متن اصلی با استفاده از کلید عمومی
-    const encrypted = CryptoJS.AES.encrypt(originalText, RSAKeyPair.toString(), {
+    const encrypted = CryptoJS.AES.encrypt(message, RSAKeyPair.toString(), {
         mode: CryptoJS.mode.ECB,
     }).toString();
 
@@ -23,7 +23,7 @@ const RSAExample: React.FC = () => {
         <div>
             <h1>rsa algorithm</h1>
             <p>Original Text:
-                {originalText}</p>
+                {message}</p>
             <p>Encrypted Text:
                 {encrypted}</p>
             <p>Decrypted Text:

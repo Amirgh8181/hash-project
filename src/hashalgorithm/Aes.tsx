@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const AESExample: React.FC = () => {
+const AESExample = ({ message }: { message: string }) => {
     // کلید و بردار اولیه برای رمزنگاری و رمزگشایی
     const key = '12345678901234567890123456789012';
     const iv = '1234567890123456';
@@ -20,7 +20,7 @@ const AESExample: React.FC = () => {
     };
 
     // متن اصلی برای رمزنگاری و رمزگشایی
-    const originalText = 'Hello, World!';
+    const originalText = message;
 
     // رمزنگاری متن
     const encryptedText = encryptText(originalText);

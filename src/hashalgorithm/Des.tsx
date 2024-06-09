@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DESExample: React.FC = () => {
+const DESExample = ({ message }: { message: string }) => {
     const CryptoJS = require("crypto-js");
 
     // کلید برای رمزنگاری و رمزگشایی
@@ -20,7 +20,7 @@ const DESExample: React.FC = () => {
     };
 
     // متن اصلی برای رمزنگاری و رمزگشایی
-    const originalText = 'Hello, World!';
+    const originalText = message;
 
     // رمزنگاری متن
     const encryptedText = encryptText(originalText);
