@@ -39,8 +39,16 @@ interface loginInp extends authInput {
     value: string
 }
 
-
-
+interface postDataForLogin {
+    email: string
+    password: string
+    challenge: string
+    salt: string
+}
+export interface hashingPass {
+    challenge: string
+    salt: string
+}
 const LoginForm = () => {
     //hook form initialize 
     const {
@@ -53,10 +61,14 @@ const LoginForm = () => {
     })
     //state
     const [loading, setLoading] = useState(false)
+    const [postDataForLogin, setPostDataForLogin] = useState<postDataForLogin>()
+    const [successLogin, setSuccessLogin] = useState<boolean>()
+    const [hahing, setHashing] = useState<hashingPass>()
     const router = useRouter()
     const { loginSaltShow, loginChallengeShow, loginEmailShow } = useLogin()
     const { setCheckLogin } = useCheckLogin()
 
+    const md5 = require("blueimp-md5");
 
     //submit hadler
     const onSubmit: SubmitHandler<LoginDataType> = async (e) => {
@@ -64,9 +76,17 @@ const LoginForm = () => {
         console.log(e);
 
         setLoading(true)
+        setPostDataForLogin({ ...e, challenge: loginChallengeShow, salt: loginSaltShow })
         const req = await signInUsers({ ...e, challenge: loginChallengeShow, salt: loginSaltShow })
+
         if (req.success) {
             setCheckLogin(true)
+            setSuccessLogin(true)
+            const hashWithSalt = md5(`${e.password} ${loginSaltShow}`)
+            setHashing({
+                salt: hashWithSalt, challenge: md5(`${loginChallengeShow} ${hashWithSalt}`)
+            })
+            localStorage.removeItem("Login")
             swal({
                 icon: "success",
                 title: 'successfull login',
@@ -74,10 +94,6 @@ const LoginForm = () => {
                 buttons: [false],
                 className: styles.swal
             });
-            localStorage.removeItem("Login")
-            setTimeout(() => {
-                router.push('/')
-            }, 1000);
         } else {
             swal({
                 icon: "warning",
@@ -92,7 +108,7 @@ const LoginForm = () => {
 
         }
 
-        
+
         setLoading(false)
         reset()
     }
@@ -103,7 +119,7 @@ const LoginForm = () => {
     ]
 
     return (
-        <div className="w-full flex justify-center">
+        <div className="w-full flex flex-col items-center space-y-6">
             {
                 loading &&
                 <div className='w-full h-screen fixed inset-0 z-40 bg-petBlue/50 flex flex-col items-center justify-center'>
@@ -111,33 +127,50 @@ const LoginForm = () => {
                     <div className='text-white'>please wait ...</div>
                 </div>
             }
-            <div className={styles.formContainer}>
+            {
+                !successLogin &&
+                <div className={styles.formContainer}>
+                    <form className="space-y-8 w-full" onSubmit={handleSubmit(onSubmit)}>
+                        {
+                            inputCreateData.map(item =>
+                                <div key={item.key} className={styles.inputContainer}>
+                                    <label htmlFor={item.registerVal} className='text-2xl text-black/70'>{item.icon}</label>
+                                    <input
+                                        key={item.key}
+                                        type={item.type}
+                                        {...register(item.registerVal)}
+                                        className={styles.input}
+                                        placeholder={item.key}
+                                        id={item.registerVal}
+                                        readOnly={item.readOnly}
+                                        defaultValue={item.value}
+                                    />
+                                    {item.err &&
+                                        <InputErr err={item.err} />
+                                    }
+                                </div>
+                            )
+                        }
+                        <Button disabled={loading} type="submit" className={styles.authBtn}>Submit</Button>
+                    </form>
+                </div>
+            }
 
-
-                <form className="space-y-8 w-full" onSubmit={handleSubmit(onSubmit)}>
-                    {
-                        inputCreateData.map(item =>
-                            <div key={item.key} className={styles.inputContainer}>
-                                <label htmlFor={item.registerVal} className='text-2xl text-black/70'>{item.icon}</label>
-                                <input
-                                    key={item.key}
-                                    type={item.type}
-                                    {...register(item.registerVal)}
-                                    className={styles.input}
-                                    placeholder={item.key}
-                                    id={item.registerVal}
-                                    readOnly={item.readOnly}
-                                    defaultValue={item.value}
-                                />
-                                {item.err &&
-                                    <InputErr err={item.err} />
-                                }
-                            </div>
-                        )
-                    }
-                    <Button disabled={loading} type="submit" className={styles.authBtn}>Submit</Button>
-                </form>
-            </div>
+            {postDataForLogin &&
+                <div>post data for login {JSON.stringify(postDataForLogin)}</div>
+            }
+            {
+                successLogin &&
+                <>
+                    <div>
+                        <p>hash password with salt</p>
+                        <p>{hahing?.salt}</p>
+                        <p>hashed password hash with challenge</p>
+                        <p>{hahing?.challenge}</p>
+                    </div>
+                    <Link href={"/"} className='bg-petBlue text-white p-2 rounded-lg'>back to home</Link>
+                </>
+            }
         </div>
     )
 }

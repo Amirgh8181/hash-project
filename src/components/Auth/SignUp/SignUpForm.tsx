@@ -28,12 +28,14 @@ import { MdOutlineEmail, MdLockOutline } from 'react-icons/md';
 import { FaUser } from "react-icons/fa";
 
 //types
-import { authInput } from '../login/LoginForm';
+import { authInput, hashingPass } from '../login/LoginForm';
 import { useSignUp } from '@/store/useSignUp';
 import signUpUser from '@/lib/signUp';
 import checkUserStatus from '@/lib/checkstatus';
 import signInUsers from '@/lib/signin';
 import { useCheckLogin } from '@/store/useCheckLogin';
+import { checkAuth } from '..';
+import Link from 'next/link';
 
 
 
@@ -44,6 +46,13 @@ interface signupInp extends authInput {
     value: string
 }
 
+interface postData extends SignUpDataType {
+    salt: string
+}
+interface signUpResp {
+    email: string
+    success: boolean
+}
 
 const SignUpForm = () => {
     //hook form import 
@@ -57,8 +66,16 @@ const SignUpForm = () => {
     })
     //state
 
+    const md5 = require("blueimp-md5");
 
     const [loading, setLoading] = useState(false)
+    const [postData, setPostData] = useState<postData>()
+    const [giveChallenge, setGiveChallenge] = useState<checkAuth>()
+    const [signUpResponse, setSignUpResponse] = useState<signUpResp | { success: boolean }>()
+    const [successLogin, setSuccessLogin] = useState<boolean>()
+    const [hahing, setHashing] = useState<hashingPass>()
+    const [hahingSignUpPass, setHashingSignUpPass] = useState<{ salt: string }>()
+
     const router = useRouter()
     const { signUpSaltShow, signUpEmail } = useSignUp()
     const { setCheckLogin } = useCheckLogin()
@@ -72,22 +89,26 @@ const SignUpForm = () => {
         setLoading(true)
         // place required data in one object and pass to call api function
         const signUpPostDetails = { ...e, salt: signUpSaltShow }
-        console.log(signUpPostDetails);
-        const req = await signUpUser(signUpPostDetails)
+        setPostData(signUpPostDetails)
+        const req: signUpResp = await signUpUser(signUpPostDetails)
+        setSignUpResponse(req)
         //show call api function response
         console.log(req);
         //if successful signup post user email to hash end point to recieve challenge
         if (req.success) {
-            const reqForReciveChallenge = await checkUserStatus({ email: req.email })
+            setHashingSignUpPass({ salt: md5(`${e.password} ${signUpSaltShow}`) })
+            const reqForReciveChallenge = await checkUserStatus({ email: req?.email })
+            setGiveChallenge(reqForReciveChallenge)
             //show receive challenge result
             console.log(reqForReciveChallenge);
             //if success to recieve challenge post required data to login api function
             if (reqForReciveChallenge) {
                 const { salt, challenge } = reqForReciveChallenge
+
                 const reqForLogin = await signInUsers({ email: e.email, password: e.password, challenge, salt })
                 //show login result
                 console.log(reqForLogin);
-                
+
                 //if success login show sweet alert and redirect to main page
                 if (reqForLogin.success) {
                     setCheckLogin(true)
@@ -98,9 +119,12 @@ const SignUpForm = () => {
                         buttons: [false],
                         className: styles.swal
                     });
-                    setTimeout(() => {
-                        router.push('/')
-                    }, 1000);
+                    setSuccessLogin(true)
+
+                    const hashWithSalt = md5(`${e.password} ${salt}`)
+                    setHashing({
+                        salt: hashWithSalt, challenge: md5(`${challenge} ${hashWithSalt}`)
+                    })
                 }
                 //if unsuccess login show sweet alert and redirect to first page
                 else {
@@ -130,7 +154,7 @@ const SignUpForm = () => {
                     router.push('/Auth')
                 }, 1000);
             }
-        } 
+        }
         //if unsuccess signup reload page
         else {
             swal({
@@ -157,7 +181,7 @@ const SignUpForm = () => {
     ]
 
     return (
-        <div className="w-full flex justify-center ">
+        <div className="w-full flex flex-col items-center space-y-6">
             {
                 loading &&
                 <div className='w-full h-screen fixed inset-0 z-40 bg-petBlue/50 flex flex-col items-center justify-center'>
@@ -192,6 +216,36 @@ const SignUpForm = () => {
                     <Button disabled={loading} isLoading={loading} type="submit" className={styles.authBtn}>Submit</Button>
                 </form>
             </div>
+            {
+                postData &&
+                <div>user data to signup:{JSON.stringify(postData)}</div>
+            }
+            {
+                signUpResponse &&
+                <>
+
+                    <div>signup response:{JSON.stringify(signUpResponse)}</div>
+                </>
+            }
+            {
+                giveChallenge &&
+                <>
+                    <p>hash user pass with salt and store on db:{hahingSignUpPass?.salt}</p>
+                    <div>post success sign up user email for give challenge and login:{JSON.stringify(giveChallenge)}</div>
+                </>
+            }
+            {
+                successLogin &&
+                <>
+                    <div>
+                        <p>hash password with salt</p>
+                        <p>{hahing?.salt}</p>
+                        <p>hashed password hash with challenge</p>
+                        <p>{hahing?.challenge}</p>
+                    </div>
+                    <Link href={"/"} className='bg-petBlue text-white p-2 rounded-lg'>back to home</Link>
+                </>
+            }
         </div>
 
     )
